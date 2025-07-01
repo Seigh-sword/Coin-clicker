@@ -122,115 +122,113 @@
   <!-- AUDIO -->
   <audio id="coinSound" src="coin-sound.mp3" preload="auto"></audio>
 
-  <script>
-    let coins = 0;
-    let coinsPerSecond = 0;
-    let highscore = 0;
-    let shopVisible = false;
-    const achievements = [
-      { coins: 1, name: "First Click!" },
-      { coins: 10, name: "Getting Started" },
-      { coins: 50, name: "Shop Time!" },
-      { coins: 100, name: "💸 Big Clicker!" },
-      { coins: 500, name: "💰 Coin Tycoon" },
-      { coins: 1000, name: "👑 Ultimate Clicker" },
-    ];
-    let unlocked = [];
+<script>
+  let coins = 0;
+  let coinsPerSecond = 0;
+  let highscore = 0;
+  let shopVisible = false;
+  const achievements = [
+    { coins: 1, name: "First Click!" },
+    { coins: 10, name: "Getting Started" },
+    { coins: 50, name: "Shop Time!" },
+    { coins: 100, name: "💸 Big Clicker!" },
+    { coins: 500, name: "💰 Coin Tycoon" },
+    { coins: 1000, name: "👑 Ultimate Clicker" },
+  ];
+  let unlocked = [];
 
-    const coinSound = document.getElementById('coinSound');
-    const coinDisplay = document.getElementById('coins');
-    const highscoreDisplay = document.getElementById('highscore');
+  const coinSound = document.getElementById('coinSound');
+  const coinDisplay = document.getElementById('coins');
+  const highscoreDisplay = document.getElementById('highscore');
 
-    // Load saved data
-    window.onload = () => {
-      coins = parseFloat(localStorage.getItem("coins")) || 0;
-      coinsPerSecond = parseFloat(localStorage.getItem("cps")) || 0;
-      highscore = parseFloat(localStorage.getItem("highscore")) || 0;
-      unlocked = JSON.parse(localStorage.getItem("achievements")) || [];
+  window.onload = () => {
+    coins = parseFloat(localStorage.getItem("coins")) || 0;
+    coinsPerSecond = parseFloat(localStorage.getItem("cps")) || 0;
+    highscore = parseFloat(localStorage.getItem("highscore")) || 0;
+    unlocked = JSON.parse(localStorage.getItem("achievements")) || [];
+    updateCoins();
+    updateAchievements();
+  };
+
+  function updateCoins() {
+    coinDisplay.textContent = Math.floor(coins);
+    if (coins > highscore) {
+      highscore = coins;
+      localStorage.setItem("highscore", highscore);
+    }
+    highscoreDisplay.textContent = Math.floor(highscore);
+    localStorage.setItem("coins", coins);
+    localStorage.setItem("cps", coinsPerSecond);
+  }
+
+  document.getElementById('coinBtn').addEventListener('click', () => {
+    coins++;
+    updateCoins();
+    spawnFlyingCoin();
+    playSound();
+    checkAchievements();
+  });
+
+  function spawnFlyingCoin() {
+    const coin = document.createElement('img');
+    coin.src = 'coin.png';
+    coin.className = 'flying-coin';
+    coin.style.left = (window.innerWidth / 2 - 16 + Math.random() * 40 - 20) + 'px';
+    coin.style.top = (window.scrollY + 150) + 'px';
+    document.getElementById('coinContainer').appendChild(coin);
+    setTimeout(() => coin.remove(), 1000);
+  }
+
+  function playSound() {
+    coinSound.currentTime = 0;
+    coinSound.play();
+  }
+
+  function buyAutoClicker(amount, cost) {
+    if (coins >= cost) {
+      coins -= cost;
+      coinsPerSecond += amount;
       updateCoins();
-      updateAchievements();
-    };
-
-    function updateCoins() {
-      coinDisplay.textContent = Math.floor(coins);
-      if (coins > highscore) {
-        highscore = coins;
-        localStorage.setItem("highscore", highscore);
-      }
-      highscoreDisplay.textContent = Math.floor(highscore);
-      localStorage.setItem("coins", coins);
-      localStorage.setItem("cps", coinsPerSecond);
+      alert(`Bought +${amount}/sec!`);
+    } else {
+      alert("Not enough coins!");
     }
+  }
 
-    document.getElementById('coinBtn').addEventListener('click', () => {
-      coins++;
-      updateCoins();
-      spawnFlyingCoin();
-      playSound();
-      checkAchievements();
-    });
+  setInterval(() => {
+    coins += coinsPerSecond / 10;
+    updateCoins();
+  }, 100);
 
-    function spawnFlyingCoin() {
-      const coin = document.createElement('img');
-      coin.src = 'coin.png';
-      coin.className = 'flying-coin';
-      coin.style.left = (window.innerWidth / 2 - 16 + Math.random() * 40 - 20) + 'px';
-      coin.style.top = (window.scrollY + 150) + 'px';
-      document.getElementById('coinContainer').appendChild(coin);
-      setTimeout(() => coin.remove(), 1000);
-    }
+  document.getElementById('storeBtn').addEventListener('click', () => {
+    shopVisible = !shopVisible;
+    document.getElementById('shop').style.display = shopVisible ? "block" : "none";
+  });
 
-    function playSound() {
-      coinSound.currentTime = 0;
-      coinSound.play();
-    }
-
-    function buyAutoClicker(amount, cost) {
-      if (coins >= cost) {
-        coins -= cost;
-        coinsPerSecond += amount;
-        updateCoins();
-        alert(`Bought +${amount}/sec!`);
-      } else {
-        alert("Not enough coins!");
-      }
-    }
-
-    setInterval(() => {
-      coins += coinsPerSecond / 10;
-      updateCoins();
-    }, 100);
-
-    document.getElementById('storeBtn').addEventListener('click', () => {
-      shopVisible = !shopVisible;
-      document.getElementById('shop').style.display = shopVisible ? "block" : "none";
-    });
-
-    function checkAchievements() {
-      for (let a of achievements) {
-        if (coins >= a.coins && !unlocked.includes(a.name)) {
-          unlocked.push(a.name);
-          localStorage.setItem("achievements", JSON.stringify(unlocked));
-          const el = document.createElement('div');
-          el.className = "achieve";
-          el.textContent = "🏆 " + a.name;
-          document.getElementById('achievements').appendChild(el);
-          alert("🎉 Achievement Unlocked: " + a.name);
-        }
-      }
-    }
-
-    function updateAchievements() {
-      for (let a of unlocked) {
+  function checkAchievements() {
+    for (let a of achievements) {
+      if (coins >= a.coins && !unlocked.includes(a.name)) {
+        unlocked.push(a.name);
+        localStorage.setItem("achievements", JSON.stringify(unlocked));
         const el = document.createElement('div');
         el.className = "achieve";
-        el.textContent = "🏆 " + a;
+        el.textContent = "🏆 " + a.name;
         document.getElementById('achievements').appendChild(el);
+        alert("🎉 Achievement Unlocked: " + a.name);
       }
     }
-  </script>
-  <script>
-  // 🧙‍♂️ SECRET COMMAND SYSTEM
+  }
+
+  function updateAchievements() {
+    for (let a of unlocked) {
+      const el = document.createElement('div');
+      el.className = "achieve";
+      el.textContent = "🏆 " + a;
+      document.getElementById('achievements').appendChild(el);
+    }
+  }
+
+  // 🚀 CONSOLE COMMANDS 💻
   window.Set_coins = function(amount) {
     coins = Number(amount) || 0;
     updateCoins();
@@ -276,14 +274,10 @@
     console.log("🌈 Rainbow mode activated!");
   }
 
-  console.log("%c🎮 Dev Mode Activated", "color: lime; font-size: 20px;");
-  console.log("Try commands like:");
-  console.log("Set_coins(5000)");
-  console.log("coins_clicked(100)");
-  console.log("auto_click(10)");
-  console.log("speed(2)");
-  console.log("rainbow()");
+  console.log("%c🎮 Dev Console Ready", "color: lime; font-size: 18px;");
+  console.log("Try: Set_coins(500), coins_clicked(100), auto_click(10), speed(2), rainbow()");
 </script>
+
 
 </body>
 </html>
