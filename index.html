@@ -1,27 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>💰 Click Coinz 💰</title>
+  <title>💰 Click Coinz 2.0 💰</title>
   <style>
     body {
       font-family: 'Comic Sans MS', cursive;
-      background: #222;
+      background: #111;
       color: #fff;
       text-align: center;
       margin: 0;
       padding-top: 50px;
       overflow-x: hidden;
     }
-
-    h1 {
-      font-size: 3em;
-      color: gold;
-    }
-
-    #coins {
-      font-weight: bold;
-      color: #0f0;
-    }
+    h1 { color: gold; font-size: 3em; }
+    #coins, #highscore { color: lime; font-weight: bold; }
 
     #coinBtn {
       background: none;
@@ -29,7 +21,6 @@
       padding: 0;
       cursor: pointer;
       position: relative;
-      z-index: 1;
     }
 
     #coinImg {
@@ -54,21 +45,13 @@
       width: 32px;
       height: 32px;
       image-rendering: pixelated;
-      animation: flyUp 0.8s ease-out forwards;
+      animation: launchUp 1s ease-out forwards;
     }
 
-    @keyframes flyUp {
-      0% {
-        transform: translateY(0px);
-        opacity: 1;
-      }
-      50% {
-        transform: translateY(-100px) scale(1.1);
-      }
-      100% {
-        transform: translateY(0px);
-        opacity: 0;
-      }
+    @keyframes launchUp {
+      0% { transform: translateY(0px); opacity: 1; }
+      50% { transform: translateY(-120px) scale(1.2); }
+      100% { transform: translateY(-200px) scale(1) rotate(360deg); opacity: 0; }
     }
 
     #storeBtn {
@@ -96,14 +79,27 @@
       cursor: pointer;
     }
 
-    .upgrade:hover {
-      background: #444;
+    .upgrade:hover { background: #444; }
+
+    #achievements {
+      margin-top: 20px;
+      font-size: 0.9em;
+      color: gold;
+    }
+
+    .achieve {
+      background: #222;
+      border: 1px solid gold;
+      padding: 5px 10px;
+      margin: 5px;
+      display: inline-block;
+      border-radius: 8px;
     }
   </style>
 </head>
 <body>
-  <h1>💰 Click Coinz 💰</h1>
-  <h2>Coins: <span id="coins">0</span></h2>
+  <h1>💰 Click Coinz 2.0 💰</h1>
+  <h2>Coins: <span id="coins">0</span> | Highscore: <span id="highscore">0</span></h2>
 
   <button id="coinBtn">
     <img src="coin.png" id="coinImg" alt="coin" />
@@ -116,30 +112,78 @@
 
   <div id="shop">
     <h2>Upgrades</h2>
-    <div class="upgrade" onclick="buyAutoClicker(1, 50)">Auto Clicker +1/sec (50)</div>
-    <div class="upgrade" onclick="buyAutoClicker(5, 200)">Auto Clicker +5/sec (200)</div>
-    <div class="upgrade" onclick="buyAutoClicker(10, 500)">Auto Clicker +10/sec (500)</div>
+    <div class="upgrade" onclick="buyAutoClicker(1, 50)">+1/sec (Cost: 50)</div>
+    <div class="upgrade" onclick="buyAutoClicker(5, 200)">+5/sec (Cost: 200)</div>
+    <div class="upgrade" onclick="buyAutoClicker(10, 500)">+10/sec (Cost: 500)</div>
   </div>
+
+  <div id="achievements"><h3>🏆 Achievements:</h3></div>
+
+  <!-- AUDIO -->
+  <audio id="coinSound" src="coin-sound.mp3" preload="auto"></audio>
 
   <script>
     let coins = 0;
     let coinsPerSecond = 0;
+    let highscore = 0;
     let shopVisible = false;
+    const achievements = [
+      { coins: 1, name: "First Click!" },
+      { coins: 10, name: "Getting Started" },
+      { coins: 50, name: "Shop Time!" },
+      { coins: 100, name: "💸 Big Clicker!" },
+      { coins: 500, name: "💰 Coin Tycoon" },
+      { coins: 1000, name: "👑 Ultimate Clicker" },
+    ];
+    let unlocked = [];
+
+    const coinSound = document.getElementById('coinSound');
+    const coinDisplay = document.getElementById('coins');
+    const highscoreDisplay = document.getElementById('highscore');
+
+    // Load saved data
+    window.onload = () => {
+      coins = parseFloat(localStorage.getItem("coins")) || 0;
+      coinsPerSecond = parseFloat(localStorage.getItem("cps")) || 0;
+      highscore = parseFloat(localStorage.getItem("highscore")) || 0;
+      unlocked = JSON.parse(localStorage.getItem("achievements")) || [];
+      updateCoins();
+      updateAchievements();
+    };
 
     function updateCoins() {
-      document.getElementById('coins').textContent = Math.floor(coins);
+      coinDisplay.textContent = Math.floor(coins);
+      if (coins > highscore) {
+        highscore = coins;
+        localStorage.setItem("highscore", highscore);
+      }
+      highscoreDisplay.textContent = Math.floor(highscore);
+      localStorage.setItem("coins", coins);
+      localStorage.setItem("cps", coinsPerSecond);
     }
 
     document.getElementById('coinBtn').addEventListener('click', () => {
       coins++;
       updateCoins();
       spawnFlyingCoin();
+      playSound();
+      checkAchievements();
     });
 
-    document.getElementById('storeBtn').addEventListener('click', () => {
-      shopVisible = !shopVisible;
-      document.getElementById('shop').style.display = shopVisible ? "block" : "none";
-    });
+    function spawnFlyingCoin() {
+      const coin = document.createElement('img');
+      coin.src = 'coin.png';
+      coin.className = 'flying-coin';
+      coin.style.left = (window.innerWidth / 2 - 16 + Math.random() * 40 - 20) + 'px';
+      coin.style.top = (window.scrollY + 150) + 'px';
+      document.getElementById('coinContainer').appendChild(coin);
+      setTimeout(() => coin.remove(), 1000);
+    }
+
+    function playSound() {
+      coinSound.currentTime = 0;
+      coinSound.play();
+    }
 
     function buyAutoClicker(amount, cost) {
       if (coins >= cost) {
@@ -157,17 +201,89 @@
       updateCoins();
     }, 100);
 
-    function spawnFlyingCoin() {
-      const coin = document.createElement('img');
-      coin.src = 'coin.png';
-      coin.className = 'flying-coin';
+    document.getElementById('storeBtn').addEventListener('click', () => {
+      shopVisible = !shopVisible;
+      document.getElementById('shop').style.display = shopVisible ? "block" : "none";
+    });
 
-      coin.style.left = (window.innerWidth / 2 + Math.random() * 100 - 50) + 'px';
-      coin.style.top = (window.scrollY + 150) + 'px';
+    function checkAchievements() {
+      for (let a of achievements) {
+        if (coins >= a.coins && !unlocked.includes(a.name)) {
+          unlocked.push(a.name);
+          localStorage.setItem("achievements", JSON.stringify(unlocked));
+          const el = document.createElement('div');
+          el.className = "achieve";
+          el.textContent = "🏆 " + a.name;
+          document.getElementById('achievements').appendChild(el);
+          alert("🎉 Achievement Unlocked: " + a.name);
+        }
+      }
+    }
 
-      document.getElementById('coinContainer').appendChild(coin);
-      setTimeout(() => coin.remove(), 800);
+    function updateAchievements() {
+      for (let a of unlocked) {
+        const el = document.createElement('div');
+        el.className = "achieve";
+        el.textContent = "🏆 " + a;
+        document.getElementById('achievements').appendChild(el);
+      }
     }
   </script>
+  <script>
+  // 🧙‍♂️ SECRET COMMAND SYSTEM
+  window.Set_coins = function(amount) {
+    coins = Number(amount) || 0;
+    updateCoins();
+    console.log("✅ Coins set to", coins);
+  };
+
+  window.coins_clicked = function(amount) {
+    for (let i = 0; i < amount; i++) {
+      coins++;
+      spawnFlyingCoin();
+      checkAchievements();
+    }
+    updateCoins();
+    console.log("🖱️ Clicked", amount, "times.");
+  };
+
+  window.auto_click = function(amount) {
+    coinsPerSecond = Number(amount) || 0;
+    localStorage.setItem("cps", coinsPerSecond);
+    console.log("⚙️ Auto click set to", coinsPerSecond, "/sec");
+  };
+
+  window.speed = function(amount) {
+    let scale = Math.max(0.1, Number(amount));
+    document.querySelectorAll('.flying-coin').forEach(el => {
+      el.style.animationDuration = (1 / scale) + 's';
+    });
+    document.body.style.transition = "all 0.2s ease";
+    document.body.style.transform = `scale(${Math.min(scale, 3)})`;
+    console.log("⏩ Speed scale set to:", scale);
+  };
+
+  window.rainbow = rainbow;
+  window.colour_full = rainbow;
+
+  function rainbow() {
+    const colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink'];
+    let i = 0;
+    setInterval(() => {
+      document.body.style.backgroundColor = colors[i % colors.length];
+      i++;
+    }, 300);
+    console.log("🌈 Rainbow mode activated!");
+  }
+
+  console.log("%c🎮 Dev Mode Activated", "color: lime; font-size: 20px;");
+  console.log("Try commands like:");
+  console.log("Set_coins(5000)");
+  console.log("coins_clicked(100)");
+  console.log("auto_click(10)");
+  console.log("speed(2)");
+  console.log("rainbow()");
+</script>
+
 </body>
 </html>
