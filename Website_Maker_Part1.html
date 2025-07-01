@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Website Maker</title>
+  <link rel="icon" href="🧱">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #111;
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .main-layout {
+      display: flex;
+      height: 100vh;
+    }
+
+    .sidebar {
+      width: 100px;
+      background: #000;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      border-right: 1px solid #444;
+    }
+
+    .sidebar button, .sidebar input[type="file"] {
+      width: 100%;
+      padding: 10px;
+      background: #fff;
+      color: #000;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .sidebar button:hover {
+      background: #ccc;
+    }
+
+    .content-area {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .code-box textarea {
+      width: 100%;
+      min-height: 120px;
+      resize: vertical;
+      background: #1b1b1b;
+      color: #fff;
+      border: 1px solid #555;
+      padding: 10px;
+      font-family: monospace;
+      margin-bottom: 10px;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .project-info {
+      margin-top: 20px;
+      display: none;
+      background: #222;
+      padding: 10px;
+      border: 1px solid #fff;
+    }
+
+    .project-info h3 {
+      margin-top: 0;
+    }
+
+    .blue-button {
+      background-color: steelblue;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .blue-button:hover {
+      background-color: deepskyblue;
+    }
+
+    #previewArea {
+      margin-top: 20px;
+      border: 1px solid #444;
+      background: #1b1b1b;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="main-layout">
+    <div class="sidebar">
+      <button onclick="saveBench()">💾 Save</button>
+      <button onclick="previewBench()">▶️ Preview</button>
+      <button onclick="toggleInfo()">ℹ️ Info</button>
+      <button onclick="deleteAccount()">🗑️ Delete</button>
+      <input type="file" id="uploadPic" accept="image/*">
+    </div>
+    <div class="content-area">
+      <div class="top-bar">
+        <h2>💺 Website Maker</h2>
+        <button class="blue-button" onclick="openPublishPanel()">🔵 Publish</button>
+      </div>
+
+      <div class="code-box">
+        <label>HTML:</label>
+        <textarea id="cb_html" placeholder="Write HTML here..."></textarea>
+
+        <label>CSS:</label>
+        <textarea id="cb_css" placeholder="Write CSS here..."></textarea>
+
+        <label>JavaScript:</label>
+        <textarea id="cb_js" placeholder="Write JavaScript here..."></textarea>
+      </div>
+
+      <div id="previewArea">🧠 Preview will appear here!</div>
+
+      <div class="project-info" id="projectInfo">
+        <h3>📦 Project Info</h3>
+        <p><strong>Title:</strong> <span id="infoTitle">...</span></p>
+        <p><strong>Description:</strong> <span id="infoDesc">...</span></p>
+        <p><strong>Credits:</strong> <span id="infoCredits">@me</span></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- External JavaScript -->
+  <script src="script.js"></script>
+</body>
+</html>
