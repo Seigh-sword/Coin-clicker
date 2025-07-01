@@ -2,13 +2,13 @@
 <html>
 <head>
   <title>💰 Click Coinz 💰</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
   <style>
     body {
-      font-family: 'Comic Sans MS', sans-serif;
-      background-color: #222;
+      font-family: 'Comic Sans MS', cursive;
+      background: #222;
       color: #fff;
       text-align: center;
+      margin: 0;
       padding-top: 50px;
       overflow-x: hidden;
     }
@@ -46,7 +46,7 @@
       width: 100%;
       height: 100%;
       pointer-events: none;
-      z-index: 999;
+      z-index: 10;
     }
 
     .flying-coin {
@@ -54,19 +54,19 @@
       width: 32px;
       height: 32px;
       image-rendering: pixelated;
-      animation: coinPop 1s ease-out forwards;
+      animation: flyUp 0.8s ease-out forwards;
     }
 
-    @keyframes coinPop {
+    @keyframes flyUp {
       0% {
-        transform: translateY(0px) scale(1);
+        transform: translateY(0px);
         opacity: 1;
       }
       50% {
-        transform: translateY(-100px) scale(1.2) rotate(180deg);
+        transform: translateY(-100px) scale(1.1);
       }
       100% {
-        transform: translateY(0px) scale(1) rotate(360deg);
+        transform: translateY(0px);
         opacity: 0;
       }
     }
@@ -74,17 +74,17 @@
     #storeBtn {
       margin-top: 20px;
       padding: 10px 30px;
-      font-size: 1.3em;
-      background: #0f0;
-      color: #000;
+      font-size: 1.2em;
+      background: limegreen;
+      color: black;
       border-radius: 10px;
       border: none;
       cursor: pointer;
     }
 
     #shop {
-      margin-top: 30px;
       display: none;
+      margin-top: 30px;
     }
 
     .upgrade {
@@ -106,22 +106,19 @@
   <h2>Coins: <span id="coins">0</span></h2>
 
   <button id="coinBtn">
-    <img src="coin.png" id="coinImg" alt="coin">
+    <img src="coin.png" id="coinImg" alt="coin" />
   </button>
 
-  <!-- Flying Coin Container -->
   <div id="coinContainer"></div>
 
-  <!-- Store Button -->
   <br><br>
   <button id="storeBtn">🛒 Store</button>
 
-  <!-- Shop Area -->
-  <div id="shop" class="animate__animated">
-    <h2>🛍️ Welcome to the Shop</h2>
-    <div class="upgrade" onclick="buyAutoClicker(1, 50)">🖱️ Auto Clicker +1/sec (Cost: 50)</div>
-    <div class="upgrade" onclick="buyAutoClicker(5, 200)">🖱️ Auto Clicker +5/sec (Cost: 200)</div>
-    <div class="upgrade" onclick="buyAutoClicker(10, 500)">🖱️ Auto Clicker +10/sec (Cost: 500)</div>
+  <div id="shop">
+    <h2>Upgrades</h2>
+    <div class="upgrade" onclick="buyAutoClicker(1, 50)">Auto Clicker +1/sec (50)</div>
+    <div class="upgrade" onclick="buyAutoClicker(5, 200)">Auto Clicker +5/sec (200)</div>
+    <div class="upgrade" onclick="buyAutoClicker(10, 500)">Auto Clicker +10/sec (500)</div>
   </div>
 
   <script>
@@ -129,69 +126,47 @@
     let coinsPerSecond = 0;
     let shopVisible = false;
 
-    // Update Coins
     function updateCoins() {
       document.getElementById('coins').textContent = Math.floor(coins);
     }
 
-    // Buy Auto Clicker
-    function buyAutoClicker(amount, cost) {
-      if (coins >= cost) {
-        coins -= cost;
-        coinsPerSecond += amount;
-        updateCoins();
-        alert(`Bought +${amount}/sec auto clicker!`);
-      } else {
-        alert("Not enough coins 😢");
-      }
-    }
-
-    // Coin Button Click
     document.getElementById('coinBtn').addEventListener('click', () => {
       coins++;
       updateCoins();
       spawnFlyingCoin();
     });
 
-    // Toggle Shop
     document.getElementById('storeBtn').addEventListener('click', () => {
-      const shop = document.getElementById('shop');
       shopVisible = !shopVisible;
-      if (shopVisible) {
-        shop.style.display = 'block';
-        shop.classList.remove('animate__fadeOutUp');
-        shop.classList.add('animate__fadeInDown');
-      } else {
-        shop.classList.remove('animate__fadeInDown');
-        shop.classList.add('animate__fadeOutUp');
-        setTimeout(() => {
-          shop.style.display = 'none';
-        }, 700);
-      }
+      document.getElementById('shop').style.display = shopVisible ? "block" : "none";
     });
 
-    // Auto Coin Gain
+    function buyAutoClicker(amount, cost) {
+      if (coins >= cost) {
+        coins -= cost;
+        coinsPerSecond += amount;
+        updateCoins();
+        alert(`Bought +${amount}/sec!`);
+      } else {
+        alert("Not enough coins!");
+      }
+    }
+
     setInterval(() => {
       coins += coinsPerSecond / 10;
       updateCoins();
     }, 100);
 
-    // Spawn Flying Coin
     function spawnFlyingCoin() {
-      const coinContainer = document.getElementById('coinContainer');
-      const flyingCoin = document.createElement('img');
-      flyingCoin.src = 'coin.png';
-      flyingCoin.classList.add('flying-coin');
+      const coin = document.createElement('img');
+      coin.src = 'coin.png';
+      coin.className = 'flying-coin';
 
-      const x = Math.random() * window.innerWidth * 0.8 + 50;
-      flyingCoin.style.left = `${x}px`;
-      flyingCoin.style.top = `${window.scrollY + 150}px`;
+      coin.style.left = (window.innerWidth / 2 + Math.random() * 100 - 50) + 'px';
+      coin.style.top = (window.scrollY + 150) + 'px';
 
-      coinContainer.appendChild(flyingCoin);
-
-      setTimeout(() => {
-        flyingCoin.remove();
-      }, 1000);
+      document.getElementById('coinContainer').appendChild(coin);
+      setTimeout(() => coin.remove(), 800);
     }
   </script>
 </body>
